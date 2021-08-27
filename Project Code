@@ -1,0 +1,660 @@
+
+GPA Before
+```{r}
+set.seed(42) # Ensure reproducibility of random results.
+mean <- 5.618
+sd <- 1.14
+n <- 100
+x <- rnorm(n, mean, sd)
+
+# Fancy plot, if desired
+ggplot(data.frame(x), aes(x=x)) +
+    geom_histogram(color="black", fill="white") +
+    annotate("text", x = -0.30, y = 12.3, label = round(mean(x), 4)) +
+    annotate("text", x = -0.30, y = 12.3, label = "Mean") +
+    ylab("Count") +
+    geom_vline(xintercept = mean(x), linetype = "dashed", 
+               size = 1, colour = "red") +
+    theme_classic()
+```
+```{r}
+mean(x)
+```
+
+```{r}
+set.seed(43)
+mean <- 5.618
+sd <- 1.14
+size <- 100
+x <- replicate(10000, mean(rnorm(size, mean, sd)))
+
+# Fancy plot, if desired
+ggplot(data.frame(x), aes(x=x)) +
+    geom_histogram(color="black", fill="white") +
+    annotate("text", x = -0.055, y = 1050, label = round(mean(x), 4)) +
+    annotate("text", x = -0.055, y = 1100, label = "Mean") +
+    ylab("Count") +
+    geom_vline(xintercept = mean(x), linetype = "dashed", 
+               size = 1, colour = "red") +
+    theme_classic()
+```
+
+
+
+```{r}
+permutation.test <- function(treatment, outcome, n){
+  distribution=c()
+  result=0
+  for(i in 1:n){
+    distribution[i]=diff(by(outcome, sample(treatment, length(treatment), FALSE), mean))
+  }
+  result=sum(abs(distribution) >= abs(original))/(n)
+  return(list(result, distribution))
+}
+
+test1 <- permutation.test(treatment, outcome, 10000)
+hist(test1[[2]], breaks=50, col='grey', main="Permutation Distribution", las=1, xlab='')
+abline(v=original, lwd=3, col="red")
+
+test1[[1]]
+```
+
+
+Notes:
+-97 total observations so far. Only drawing conclusions based on 95, 1 blank answer and one non-cal poly student
+-Can't really make any conclusions on Year since our data is so heavily in favor of sophmores. Not enough freshman seniors and juniors oberved to make any true conclusions based on our data observations.
+1) 1 prop tests for whole pop
+Motivation:
+difference of proportions
+prop.test(c(#decr var1, #decr var2), c(total# var1, total# var2))
+one prop test for whole cumulative results
+same thing, prop.test()
+pairwises
+1) gender ethncity, socioecomic 2 prop tests
+
+GPA:
+1) try randomization
+2) simulation based p value for chi squar
+-permutation based test
+-multiple hypotehsis testing, adjust confidence levels
+-randomization test for simulating p values
+-for other results?
+-resampling part of bootstrapping
+
+-Look at how categorical variables change gpa and motivation
+-work on responses into categories
+-put categories for gpa has whole numbers 
+(1 = C or below 2 = C+ 3 = B- 4 = B 5 = B+ 6 = A- 7 = A)
+- check differences across surveying method
+-chisq
+-titles on plots === barplot(blah, main = TITLE)
+-share to a google folder w giri
+
+
+## Data Cleaning
+```{r}
+peers <- read.csv("~/Downloads/Covid Survey Peers.csv")
+insta <- read.csv("~/Downloads/Covid Survey Instagram.csv")
+facebook <- read.csv("~/Downloads/Covid Survey Facebook.csv")
+in_person <- read.csv("~/Downloads/Covid Survey In Person.csv")
+library(tidyverse)
+```
+
+```{r}
+#cleaning data
+peers$Timestamp <- NULL
+names(peers)[1] <- "Cal Poly Student?"
+names(peers)[2] <- "Year"
+names(peers)[3] <- "Primary Location"
+names(peers)[4] <- "In or Out of State"
+names(peers)[5] <- "College"
+names(peers)[6] <- "Major"
+names(peers)[7] <- "GPA_Before"
+names(peers)[8] <- "GPA_During"
+names(peers)[9] <- "Motivation_Levels"
+names(peers)[10] <- "Learned Material? Responses"
+names(peers)[11] <- "Sufficient Skills? Responses"
+names(peers)[12] <- "Socioeconomic Class"
+names(peers)[13] <- "Gender"
+names(peers)[14] <- "Ethnicity"
+
+insta$Timestamp <- NULL
+names(insta)[1] <- "Cal Poly Student?"
+names(insta)[2] <- "Year"
+names(insta)[3] <- "Primary Location"
+names(insta)[4] <- "In or Out of State"
+names(insta)[5] <- "College"
+names(insta)[6] <- "Major"
+names(insta)[7] <- "GPA_Before"
+names(insta)[8] <- "GPA_During"
+names(insta)[9] <- "Motivation_Levels"
+names(insta)[10] <- "Learned Material? Responses"
+names(insta)[11] <- "Sufficient Skills? Responses"
+names(insta)[12] <- "Socioeconomic Class"
+names(insta)[13] <- "Gender"
+names(insta)[14] <- "Ethnicity"
+
+in_person$Timestamp <- NULL
+names(in_person)[1] <- "Cal Poly Student?"
+names(in_person)[2] <- "Year"
+names(in_person)[3] <- "Primary Location"
+names(in_person)[4] <- "In or Out of State"
+names(in_person)[5] <- "College"
+names(in_person)[6] <- "Major"
+names(in_person)[7] <- "GPA_Before"
+names(in_person)[8] <- "GPA_During"
+names(in_person)[9] <- "Motivation_Levels"
+names(in_person)[10] <- "Learned Material? Responses"
+names(in_person)[11] <- "Sufficient Skills? Responses"
+names(in_person)[12] <- "Socioeconomic Class"
+names(in_person)[13] <- "Gender"
+names(in_person)[14] <- "Ethnicity"
+
+facebook$Timestamp <- NULL
+names(facebook)[1] <- "Cal Poly Student?"
+names(facebook)[2] <- "Year"
+names(facebook)[3] <- "Primary Location"
+names(facebook)[4] <- "had Covid?"
+names(facebook)[5] <- "In or Out of State"
+names(facebook)[6] <- "College"
+names(facebook)[7] <- "Major"
+names(facebook)[8] <- "GPA_Before"
+names(facebook)[9] <- "GPA_During"
+names(facebook)[10] <- "Motivation_Levels"
+names(facebook)[11] <- "Learned Material? Responses"
+names(facebook)[12] <- "Sufficient Skills? Responses"
+names(facebook)[13] <- "Socioeconomic Class"
+names(facebook)[14] <- "Gender"
+names(facebook)[15] <- "Ethnicity"
+
+facebook <- facebook %>%
+  mutate(
+    Had_Covid = case_when(
+      str_detect(`had Covid?`, "Yes") == TRUE ~ "Yes",
+      str_detect(`had Covid?`, "No") == TRUE ~ "No"
+    )
+  )
+facebook$`had Covid?` <- NULL
+names(facebook)[15] <- "Had Covid?"
+```
+
+```{r}
+insta <- insta %>%
+  mutate(
+    had_covid = "NA",
+    sampling_type = "insta"
+  ) %>%
+  filter(`Cal Poly Student?` == "Yes")
+names(insta)[15] <- "Had Covid?"
+insta$had_covid <- NULL
+peers <- peers %>%
+  mutate(
+    had_covid = "NA",
+    sampling_type = "peer"
+  )
+names(peers)[15] <- "Had Covid?"
+peers$had_covid <- NULL
+in_person <- in_person %>%
+  mutate(
+    had_covid = "NA",
+    sampling_type = "in_person"
+  )
+names(in_person)[15] <- "Had Covid?"
+in_person$had_covid <- NULL
+facebook <- facebook %>%
+  mutate(
+    sampling_type = "facebook"
+  )
+cumulative <- rbind(in_person, peers, insta, facebook)
+```
+
+```{r}
+cumulative <- cumulative %>%
+  filter(`Cal Poly Student?` == "Yes") %>%
+  distinct()
+```
+
+```{r}
+cumulative <- cumulative %>%
+  mutate(
+    Learned_Material = case_when(
+      str_detect(`Learned Material? Responses`, "Being able to create my own schedule has helped balance out my life") == TRUE ~ "Same",
+      str_detect(`Learned Material? Responses`, "I knew how to study better as a second year") == TRUE ~ "Worse",
+      str_detect(`Learned Material? Responses`, "Worse") == TRUE ~ "Worse",
+      str_detect(`Learned Material? Responses`, "worse") == TRUE ~ "Worse",
+      str_detect(`Learned Material? Responses`, "better in person") == TRUE ~ "Worse",
+      str_detect(`Learned Material? Responses`, "has helped") == TRUE ~ "Better",
+      str_detect(`Learned Material? Responses`, "Better") == TRUE ~ "Better",
+      str_detect(`Learned Material? Responses`, "better") == TRUE ~ "Better",
+      str_detect(`Learned Material? Responses`, "Same") == TRUE ~ "Same",
+      str_detect(`Learned Material? Responses`, "same") == TRUE ~ "Same",
+      str_detect(`Learned Material? Responses`, "[A-z]") == FALSE ~ "NA",
+      TRUE ~ "Worse"
+    ),
+    Sufficient_Skills = case_when(
+      str_detect(`Sufficient Skills? Responses`, "I don’t think I’ve learned sufficient skills during on") == TRUE ~ "No",
+      str_detect(`Sufficient Skills? Responses`, "yes and no,  most of my professors") == TRUE ~ "Nuetral",
+      str_detect(`Sufficient Skills? Responses`, "I feel that is has been sufficient") == TRUE ~ "Yes",
+      str_detect(`Sufficient Skills? Responses`, "not sure") == TRUE ~ "Nuetral",
+      str_detect(`Sufficient Skills? Responses`, "Yes") == TRUE ~ "Yes",
+      str_detect(`Sufficient Skills? Responses`, "yes") == TRUE ~ "Yes",
+      str_detect(`Sufficient Skills? Responses`, "no") == TRUE ~ "No",
+      str_detect(`Sufficient Skills? Responses`, "No") == TRUE ~ "No",
+      str_detect(`Sufficient Skills? Responses`, "not") == TRUE ~ "No",
+      str_detect(`Sufficient Skills? Responses`, "[A-z]") == FALSE ~ "NA",
+      TRUE ~ "Nuetral"
+    )
+  )
+```
+
+```{r}
+IRL <- cumulative %>%
+  filter(sampling_type == "in_person")
+Face <- cumulative %>%
+  filter(sampling_type == "facebook")
+Insta <- cumulative %>%
+  filter(sampling_type == "insta")
+peer <- cumulative %>%
+  filter(sampling_type == "peer")
+```
+
+
+```{r}
+table(IRL$Learned_Material)
+table(Face$Learned_Material)
+table(Insta$Learned_Material)
+table(peer$Learned_Material)
+9/10
+39/43
+29/31
+#prop.test(c(37, 29), c(44, 31))
+```
+
+
+
+```{r}
+#Categories for Colleges?
+cumulative <- cumulative %>%
+  mutate(
+    College_Abrev = case_when(
+      str_detect(College, "OCOB") == TRUE ~ "Business",
+      str_detect(College, "CLA") == TRUE ~ "Liberal Arts",
+      str_detect(College, "COSAM") == TRUE ~ "Science and Math",
+      str_detect(College, "CENG") == TRUE ~ "Engineering",
+      str_detect(College, "CAED") == TRUE ~ "Arch and Design",
+      str_detect(College, "CAFES") == TRUE ~ "Ag"
+    )
+  )
+```
+
+```{r}
+cumulative <- cumulative %>%
+  mutate(
+    GPA_Before_Category = case_when(
+      GPA_Before == "3.7+" ~ 7,
+      GPA_Before == "3.3 to 3.7" ~ 6,
+      GPA_Before == "3.0 to 3.3" ~ 5,
+      GPA_Before == "2.7 to 3.0" ~ 4,
+      GPA_Before == "2.3 to 2.7" ~ 3,
+      GPA_Before == "2.0 to 2.3" ~ 2,
+      GPA_Before == "2.0 and below" ~ 1
+    ),
+    GPA_During_Category = case_when(
+      GPA_During == "3.7+" ~ 7,
+      GPA_During == "3.3 to 3.7" ~ 6,
+      GPA_During == "3.0 to 3.3" ~ 5,
+      GPA_During == "2.7 to 3.0" ~ 4,
+      GPA_During == "2.3 to 2.7" ~ 3,
+      GPA_During == "2.0 to 2.3" ~ 2,
+      GPA_During == "2.0 and below" ~ 1
+    ),
+    GPA_Change = case_when(
+      GPA_Before_Category > GPA_During_Category ~ "decreased",
+      GPA_Before_Category == GPA_During_Category ~ "stayed the same",
+      GPA_Before_Category < GPA_During_Category ~ "increased"
+    ),
+    `Primary Location` = case_when(
+      `Primary Location` == "Off Campus residence" ~ "Off Campus Residence",
+      `Primary Location` == "Off Campus Residence" ~ "Off Campus Residence",
+      `Primary Location` == "On Campus residence" ~ "On Campus residence",
+      `Primary Location` == "At home" ~ "At home",
+      TRUE ~ "Not at home but not in SLO"
+    )
+  ) 
+  
+```
+
+```{r}
+facebook <- facebook %>%
+  mutate(
+    GPA_Before_Category = case_when(
+      GPA_Before == "3.7+" ~ 7,
+      GPA_Before == "3.3 to 3.7" ~ 6,
+      GPA_Before == "3.0 to 3.3" ~ 5,
+      GPA_Before == "2.7 to 3.0" ~ 4,
+      GPA_Before == "2.3 to 2.7" ~ 3,
+      GPA_Before == "2.0 to 2.3" ~ 2,
+      GPA_Before == "2.0 and below" ~ 1
+    ),
+    GPA_During_Category = case_when(
+      GPA_During == "3.7+" ~ 7,
+      GPA_During == "3.3 to 3.7" ~ 6,
+      GPA_During == "3.0 to 3.3" ~ 5,
+      GPA_During == "2.7 to 3.0" ~ 4,
+      GPA_During == "2.3 to 2.7" ~ 3,
+      GPA_During == "2.0 to 2.3" ~ 2,
+      GPA_During == "2.0 and below" ~ 1
+    ),
+    GPA_Change = case_when(
+      GPA_Before_Category > GPA_During_Category ~ "decreased",
+      GPA_Before_Category == GPA_During_Category ~ "stayed the same",
+      GPA_Before_Category < GPA_During_Category ~ "increased"
+    )
+  )
+in_person <- in_person %>%
+  mutate(
+    GPA_Before_Category = case_when(
+      GPA_Before == "3.7+" ~ 7,
+      GPA_Before == "3.3 to 3.7" ~ 6,
+      GPA_Before == "3.0 to 3.3" ~ 5,
+      GPA_Before == "2.7 to 3.0" ~ 4,
+      GPA_Before == "2.3 to 2.7" ~ 3,
+      GPA_Before == "2.0 to 2.3" ~ 2,
+      GPA_Before == "2.0 and below" ~ 1
+    ),
+    GPA_During_Category = case_when(
+      GPA_During == "3.7+" ~ 7,
+      GPA_During == "3.3 to 3.7" ~ 6,
+      GPA_During == "3.0 to 3.3" ~ 5,
+      GPA_During == "2.7 to 3.0" ~ 4,
+      GPA_During == "2.3 to 2.7" ~ 3,
+      GPA_During == "2.0 to 2.3" ~ 2,
+      GPA_During == "2.0 and below" ~ 1
+    ),
+    GPA_Change = case_when(
+      GPA_Before_Category > GPA_During_Category ~ "decreased",
+      GPA_Before_Category == GPA_During_Category ~ "stayed the same",
+      GPA_Before_Category < GPA_During_Category ~ "increased"
+    )
+  )
+insta <- insta %>%
+  mutate(
+    GPA_Before_Category = case_when(
+      GPA_Before == "3.7+" ~ 7,
+      GPA_Before == "3.3 to 3.7" ~ 6,
+      GPA_Before == "3.0 to 3.3" ~ 5,
+      GPA_Before == "2.7 to 3.0" ~ 4,
+      GPA_Before == "2.3 to 2.7" ~ 3,
+      GPA_Before == "2.0 to 2.3" ~ 2,
+      GPA_Before == "2.0 and below" ~ 1
+    ),
+    GPA_During_Category = case_when(
+      GPA_During == "3.7+" ~ 7,
+      GPA_During == "3.3 to 3.7" ~ 6,
+      GPA_During == "3.0 to 3.3" ~ 5,
+      GPA_During == "2.7 to 3.0" ~ 4,
+      GPA_During == "2.3 to 2.7" ~ 3,
+      GPA_During == "2.0 to 2.3" ~ 2,
+      GPA_During == "2.0 and below" ~ 1
+    ),
+    GPA_Change = case_when(
+      GPA_Before_Category > GPA_During_Category ~ "decreased",
+      GPA_Before_Category == GPA_During_Category ~ "stayed the same",
+      GPA_Before_Category < GPA_During_Category ~ "increased"
+    )
+  )
+peers <- peers %>%
+  mutate(
+    GPA_Before_Category = case_when(
+      GPA_Before == "3.7+" ~ 7,
+      GPA_Before == "3.3 to 3.7" ~ 6,
+      GPA_Before == "3.0 to 3.3" ~ 5,
+      GPA_Before == "2.7 to 3.0" ~ 4,
+      GPA_Before == "2.3 to 2.7" ~ 3,
+      GPA_Before == "2.0 to 2.3" ~ 2,
+      GPA_Before == "2.0 and below" ~ 1
+    ),
+    GPA_During_Category = case_when(
+      GPA_During == "3.7+" ~ 7,
+      GPA_During == "3.3 to 3.7" ~ 6,
+      GPA_During == "3.0 to 3.3" ~ 5,
+      GPA_During == "2.7 to 3.0" ~ 4,
+      GPA_During == "2.3 to 2.7" ~ 3,
+      GPA_During == "2.0 to 2.3" ~ 2,
+      GPA_During == "2.0 and below" ~ 1
+    ),
+    GPA_Change = case_when(
+      GPA_Before_Category > GPA_During_Category ~ "decreased",
+      GPA_Before_Category == GPA_During_Category ~ "stayed the same",
+      GPA_Before_Category < GPA_During_Category ~ "increased"
+    )
+  )
+```
+
+```{r}
+mean(in_person$GPA_During_Category)
+
+```
+
+
+## Graphs and Numerical Assessments
+
+```{r}
+ggplot(cumulative, aes(x="", y=GPA_Change, fill=GPA_Changeta)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+```
+
+
+```{r}
+ggplot(cumulative, aes(x="", y=Year, fill=Year)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+ggplot(cumulative, aes(x="", y=College, fill=College)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+```
+
+```{r}
+#just for fun
+ggplot(insta, aes(x="", y=Year, fill=Year)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+ggplot(peers, aes(x="", y=Year, fill=Year)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+ggplot(insta, aes(x="", y=Motivation_Levels, fill=Motivation_Levels)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+ggplot(peers, aes(x="", y=Motivation_Levels, fill=Motivation_Levels)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+```
+
+```{r}
+
+In_State_Cum <- cumulative %>%
+  filter(`In or Out of State` == "In State")
+Out_of_State_Cum <- cumulative %>%
+  filter(`In or Out of State` == "Out of State")
+ggplot(In_State_Cum, aes(x="", y=`Primary Location`, fill=`Primary Location`)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+ggplot(Out_of_State_Cum, aes(x="", y=`Primary Location`, fill=`Primary Location`)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+```
+
+```{r}
+library(modelr)
+
+library(infer)
+library(devtools)
+mean_test <- in_person %>%
+  t_test(response = GPA_Before_Category)
+mean_test %>% select(lower_ci, upper_ci)
+mean_test <- in_person %>%
+  t_test(response = GPA_During_Category)
+mean_test %>% select(lower_ci, upper_ci)
+```
+
+```{r}
+dudes <- cumulative %>%
+  filter(Gender == "Male")
+chicks <- cumulative %>%
+  filter(Gender == "Female")
+other <- cumulative %>%
+  filter(Gender == "Non Binary")
+mean_test <- dudes %>%
+  t_test(response = GPA_Before_Category)
+mean_test %>% select(lower_ci, upper_ci)
+mean_test <- dudes %>%
+  t_test(response = GPA_During_Category)
+mean_test %>% select(lower_ci, upper_ci)
+mean_test <- cumulative %>%
+  t_test(response = GPA_Before_Category)
+mean_test %>% select(lower_ci, upper_ci)
+mean_test <- cumulative %>%
+  t_test(response = GPA_During_Category)
+mean_test %>% select(lower_ci, upper_ci)
+mean_test <- chicks %>%
+  t_test(response = GPA_Before_Category)
+mean_test %>% select(lower_ci, upper_ci)
+mean_test <- chicks %>%
+  t_test(response = GPA_During_Category)
+mean_test %>% select(lower_ci, upper_ci)
+  
+```
+```{r}
+White <- cumulative %>%
+  filter(str_detect(Ethnicity, "White") == TRUE)
+African <- cumulative %>%
+  filter(str_detect(Ethnicity, "African") == TRUE)
+Asian <- cumulative %>%
+  filter(str_detect(Ethnicity, "Asian") == TRUE)
+Latino <- cumulative %>%
+  filter(str_detect(Ethnicity, "Latino") == TRUE)
+```
+```{r}
+Lower <- cumulative %>%
+  filter(str_detect(`Socioeconomic Class`, "Lower") == TRUE)
+Middle <- cumulative %>%
+  filter(str_detect(`Socioeconomic Class`, "Middle") == TRUE)
+Upper <- cumulative %>%
+  filter(str_detect(`Socioeconomic Class`, "Upper") == TRUE)
+```
+
+```{r}
+OCOB <- cumulative %>%
+  filter(str_detect(College, "OCOB") == TRUE)
+CLA <- cumulative %>%
+  filter(str_detect(College, "CLA") == TRUE)
+COSAM <- cumulative %>%
+  filter(str_detect(College, "COSAM") == TRUE)
+CENG <- cumulative %>%
+  filter(str_detect(College, "CENG") == TRUE)
+CAED <- cumulative %>%
+  filter(str_detect(College, "CAED") == TRUE)
+CAFES <- cumulative %>%
+  filter(str_detect(College, "CAFES") == TRUE)
+```
+
+```{r}
+At_Home <- cumulative %>%
+  filter(str_detect(`Primary Location`, "At home") == TRUE)
+off_campus <- cumulative %>%
+  filter(str_detect(`Primary Location`, "Off Campus Residence") == TRUE)
+on_campus <- cumulative %>%
+  filter(str_detect(`Primary Location`, "On Campus residence") == TRUE)
+In_State <- cumulative %>%
+  filter(str_detect(`In or Out of State`, "In State") == TRUE)
+Out_State <- cumulative %>%
+  filter(str_detect(`In or Out of State`, "Out of State") == TRUE)
+```
+
+
+```{r}
+mean(Upper$GPA_Before_Category)
+mean(Upper$GPA_During_Category)
+mean_test <- Upper %>%
+  t_test(response = GPA_Before_Category)
+mean_test %>% select(lower_ci, upper_ci)
+mean_test <- Upper %>%
+  t_test(response = GPA_During_Category)
+mean_test %>% select(lower_ci, upper_ci)
+```
+
+```{r}
+table(Out_State$Motivation_Levels)
+```
+
+
+```{r}
+mean(OCOB$GPA_Before_Category)
+mean(OCOB$GPA_During_Category)
+mean_test <- OCOB %>%
+  t_test(response = GPA_Before_Category)
+mean_test %>% select(lower_ci, upper_ci)
+mean_test <- OCOB %>%
+  t_test(response = GPA_During_Category)
+mean_test %>% select(lower_ci, upper_ci)
+```
+
+
+## Tests
+```{r}
+print(chisq.test(table(cumulative$`In or Out of State`, cumulative$`Primary Location`)))
+```
+
+```{r}
+#paired t test
+print(chisq.test(table(cumulative$`GPA_Before`, cumulative$`GPA_During`)))
+#looking at significant difference between GPA before and during based on very small pvalue
+```
+
+```{r}
+table(cumulative$`Gender`, cumulative$`GPA_Change`)
+```
+
+
+```{r}
+#how have certain genders been impacted GPA wise by Covid
+print(chisq.test(table(cumulative$`Gender`, cumulative$`GPA_Change`), simulate.p.value = TRUE))
+# pvalue = .21
+
+#how have certain ethnicites been impacted GPA wise by Covid
+print(chisq.test(table(cumulative$`Ethnicity`, cumulative$`GPA_Change`), simulate.p.value = TRUE))
+# pvalue = .33
+
+#how have certain socioeconomic classes been impacted GPA wise by Covid
+print(chisq.test(table(cumulative$`Socioeconomic Class`, cumulative$`GPA_Change`), simulate.p.value = TRUE))
+# pvalue = .25
+
+#how have certain survey types been impacted GPA wise by Covid
+print(chisq.test(table(cumulative$sampling_type, cumulative$`GPA_Change`), simulate.p.value = TRUE))
+# pvalue = .2819
+
+#how have certain Colleges been impacted GPA wise by Covid
+print(chisq.test(table(cumulative$`College`, cumulative$`GPA_Change`), simulate.p.value = TRUE))
+# pvalue = .1645
+
+#how has being in certain places been impacted GPA wise by Covid
+print(chisq.test(table(cumulative$`Primary Location`, cumulative$`GPA_Change`), simulate.p.value = TRUE))
+# pvalue = .28
+
+print(chisq.test(table(cumulative$`In or Out of State`, cumulative$`GPA_Change`), simulate.p.value = TRUE))
+#NEED TO FIGURE OUT HOW TO GET BAR GRAPHS OR PERCENTAGES BASED ON CERTAIN VARIABLE'S CHANCES OF INCREASING OR DECREASING
+
+```
+
+
+
+## Ideas
+
+
+
+```{r}
+ggplot(cumulative, aes(x="", y=College_Abrev, fill=College_Abrev)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+```
